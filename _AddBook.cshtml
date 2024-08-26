@@ -1,0 +1,99 @@
+﻿@model BookManagementStore.Models.BookLibrary
+
+
+
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+@Html.AntiForgeryToken()
+<div class="bg-secondary bg-opacity-10 py-2 mb-5">
+    <div class="container">
+        <form id="editForm" method="post" enctype="multipart/form-data">
+
+            <input type="hidden" asp-for="BookId" />
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="heading" class="form-label">Book Title</label>
+                        <input type="text" class="form-control" id="BookName" asp-for="BookName">
+
+                    </div>
+                    <div class="mb-3">
+                        <label for="pagetitle" class="form-label">Author</label>
+                        <input type="text" class="form-control" id="Author" asp-for="Author">
+
+                    </div>
+                    <div class="mb-3">
+                        <label for="content" class="form-label">Description</label>
+                        <textarea class="form-control" id="Description" asp-for="Description"></textarea>
+
+                    </div>
+                    <div class="mb-3">
+                        <div class="error"></div>
+                        <label for="content" class="form-label">ISBAN</label>
+                        <input type="text" class="form-control" id="ISBAN" asp-for="ISBAN">
+                    </div>
+
+                  
+                    <div class="mb-3">
+
+                        <label for="content" class="form-label">Thumbnail</label>
+                        <div class="container">
+                            <img src="@Model.Image" id="Img" class="card-img-top rounded" style="width:60%;height: 162px;" />
+                        </div>
+                        <br />
+                        <input type="file" class="form-control" name="Image" id="Image" asp-for="Image">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                   <div class="row">
+                        <div id="Bk"></div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="content" class="form-label">Images</label>
+                                    @if (Model.BookImages != null)
+                                    {
+
+                                        @foreach (var image in @Model.BookImages)
+                                        {
+                                            <li>
+                                                @*  <input type="checkbox" class="image-checkbox" id="selectedImages" value="@image.BookImageId" /> *@
+
+                                                <div class="row">
+                                                    <img src="@image.ImagePath" class="card-img-top rounded" style="width:200%;height: 162px;" />
+                                                    <a href="/BookDetails?id=@image.BookImageId" name="id" class="btn btn-primary mb-2">Details</a>
+                                                </div>
+                                            </li>
+                                        }
+                                    }
+                                <div class="form-group">
+                                    <input type="file" id="fileInput" name="fileInput" asp-for="BookImages" class="form-control-file" multiple />
+                                </div>
+                                <div id="imagePreview" class="d-flex flex-wrap"></div>
+                               
+                    
+
+                            </div>
+                           
+                            </div>
+                   </div>
+
+                   
+                </div>
+            </div>
+            
+            
+        </form>
+    </div>
+    </div>

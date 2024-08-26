@@ -1,0 +1,209 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css" />
+
+<div id="carouselExampleDark" class="carousel carousel-dark slide mb-5" data-bs-ride="carousel">
+    @if (Model.FavouriteBooks != null && Model.FavouriteBooks.Any())
+    {
+    <div class="carousel-indicators">
+       
+        @for (int i = 0; i < Model.FavouriteBooks.Count(); i++)
+        {
+            <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")" aria-current="true" aria-label="Slide @(i + 1)"></button>
+        }
+       
+    </div>
+
+    <div class="carousel-inner">
+        @foreach (var book in Model.FavouriteBooks)
+        {
+            var isActive = Model.FavouriteBooks.First() == book ? "active" : "";
+            <div class="carousel-item @isActive" data-bs-interval="10000">
+                <a href="/BookDetails?id=@book.BookId" target="_blank">
+                    <img src="@book.Banner" class="d-block w-100 rounded" alt="@book.BookName">
+                </a>
+                <div class="carousel-caption d-none d-md-block text-dark">
+                    <h5>@book.BookName</h5>
+                    <p>@book.Description</p>
+                </div>
+            </div>
+        }
+    </div>
+        }
+        else
+        {
+        <p>No favorite books available.</p>
+        }
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+    </button>
+</div>
+
+<div class="container mb-4">
+    <div class="input-group">
+        <input class="form-control" id="myInput" type="text" placeholder="Search for books...">
+        <button class="btn btn-primary" type="button" id="searchButton">Search</button>
+    </div>
+</div>
+
+<div class="container">
+    @foreach (var category in @Model.Categories)
+    {
+        var categoryIdAsGuid = category.CategoryId;
+        var booksInCategory = Model.Bkstore
+            .Where(b => b.CategoryId == categoryIdAsGuid && b.Quantity != "0")
+            .ToList();
+
+        
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header" style="background-color:khaki">
+                    <h4>@category.CategoryName</h4>
+                </div>
+                <div class="card-body">
+                    <div class="slick-carousel">
+                        @foreach (var book in booksInCategory)
+                        {
+                            <div class="slick-slide">
+                                <div class="card h-100">
+                                    <a href="/BookDetails?id=@book.BookId" class="card-img-link">
+                                        <img src="@book.Image" class="card-img-top" alt="@book.BookName">
+                                    </a>
+                                    <div class="card-body">
+                                        <h5 class="card-title">@book.BookName</h5>
+                                        <p class="card-text">@book.Description</p>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        
+    }
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('.slick-carousel').slick({
+            slidesToShow: 3.5,  
+            slidesToScroll: 1,  
+            dots: false,
+            arrows: true,
+            infinite: true,
+            autoplay: true,
+            autoplaySpeed: 3000,
+            centerMode: true,  
+            centerPadding: '10%', 
+            responsive: [
+                {
+                    breakpoint: 1200,
+                    settings: {
+                        slidesToShow: 3,
+                        centerPadding: '10%'
+                    }
+                },
+                {
+                    breakpoint: 992,
+                    settings: {
+                        slidesToShow: 2.5,
+                        centerPadding: '10%'
+                    }
+                },
+                {
+                    breakpoint: 768,
+                    settings: {
+                        slidesToShow: 2,
+                        centerPadding: '10%'
+                    }
+                }
+            ]
+        });
+
+        $('#searchButton').on('click', function () {
+            searchProducts();
+        });
+        $('#myInput').on('keyup', function () {
+            searchProducts();
+        });
+
+        function searchProducts() {
+            var value = $('#myInput').val().toLowerCase();
+            $('.card').filter(function () {
+                $(this).toggle($(this).find('.card-title').text().toLowerCase().indexOf(value) > -1);
+            });
+        }
+    });
+</script>
+
+<style>
+    .carousel-item img {
+        max-height: 500px;
+        object-fit: cover;
+    }
+
+    .carousel-caption {
+        background-color: rgba(255, 255, 255, 0.8);
+        border-radius: 10px;
+        padding: 10px;
+    }
+
+    .card {
+        transition: transform 0.3s, box-shadow 0.3s;
+        height: auto;
+        width: 100%;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-img-top {
+        height: 200px;
+        object-fit: cover;
+        border-radius: 10px 10px 0 0;
+    }
+
+    .slick-carousel {
+        padding: 20px 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .slick-slide {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 10px;
+        box-sizing: border-box;
+    }
+
+    .slick-prev, .slick-next {
+        font-size: 1px;
+        color: #007bff;
+        width: 44px;
+        height: 44px;
+        line-height: 44px;
+        z-index: 1;
+    }
+
+    .slick-prev {
+        left: 10px;
+    }
+
+    .slick-next {
+        right: 10px;
+    }
+</style>

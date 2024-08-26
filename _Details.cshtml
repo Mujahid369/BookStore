@@ -1,0 +1,102 @@
+﻿@model BookManagementStore.Models.BookLibrary
+
+
+<form id="detailsModalContent">
+    <div class="container">
+        <h2 class="mb-4"><b>Book Details</b></h2>
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title"><b>@Model.BookName</b></h5>
+                        <p class="card-text"><b>Author:</b> @Model.Author</p>
+                        <p class="card-text"><b>Description:</b> @Model.Description</p>
+                        <p class="card-text"><b>Price:</b> @Model.SoldPrice</p>
+                        <p class="card-text"><b>ISBN:</b> @Model.ISBAN</p>
+                        <p class="card-text"><b>Quantity:</b> @Model.Quantity</p>
+                    </div>
+                </div>
+            </div>
+            @if (Model.BookImages != null && Model.BookImages.Any())
+            {
+                <div class="col-lg-6">
+                    <div class="row row-cols-1 row-cols-md-2 g-4">
+                        @foreach (var item in Model.BookImages)
+                        {
+                            <div class="col">
+                                <div class="card border-0 shadow-sm">
+                                    <img src="@item.ImagePath" class="card-img-top rounded" style="height: 250px; object-fit: cover;" alt="Book Image">
+                                    <div class="card-body p-2 text-center">
+                                        <a href="@item.ImagePath" class="btn btn-sm btn-outline-primary stretched-link" target="_blank">View Full Size</a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</form>
+
+<style>
+    .container {
+        max-width: 900px;
+        margin: auto;
+    }
+
+    h2 {
+        font-size: 2rem;
+        font-weight: bold;
+    }
+
+    .card {
+        border-radius: 10px;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+
+    .card-text {
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .btn-outline-primary {
+        border-color: #007bff;
+        color: #007bff;
+        margin-top: 10px;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: #007bff;
+        color: #fff;
+    }
+
+    .row-cols-1 .col, .row-cols-md-2 .col {
+        margin-bottom: 20px;
+    }
+
+    .row-cols-1 .card, .row-cols-md-2 .card {
+        margin-bottom: 0;
+    }
+
+    
+</style>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Add tooltips to enhance user experience
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+    </script>
+}
