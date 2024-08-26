@@ -1,0 +1,90 @@
+﻿@page
+@model BookManagementStore.Pages.EditBookModel
+
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+<div class="container">
+ <div class="bg-secondary bg-opacity-10 py-2 mb-5">
+    <form method="post" enctype="multipart/form-data">
+        <div class="mb-3">
+            <input type="hidden" asp-for="BkLib.BookId" />
+            <label for="heading" class="form-label">Book Title</label>
+            <input type="text" class="form-control" id="heading" asp-for="BkLib.BookName">
+
+        </div>
+        <div class="mb-3">
+            <label for="pagetitle" class="form-label">Author</label>
+            <input type="text" class="form-control" id="pagetitle" asp-for="BkLib.Author">
+
+        </div>
+        <div class="mb-3">
+            <label for="content" class="form-label">Description</label>
+            <textarea class="form-control" id="content" asp-for="BkLib.Description"></textarea>
+
+        </div>
+        <div class="mb-3">
+            <label for="content" class="form-label">ISBAN</label>
+            <input type="text" class="form-control" id="content" asp-for="BkLib.ISBAN">
+
+        </div>
+
+        <div class="row">
+                <label for="content" class="form-label">Thumbnail</label>
+                <div class="col-6">
+                    <img src="@Model.BkLib.Image" class="card-img-top rounded" style="width:20%" />
+                    <div class="mb-3">
+                        <input type="file" class="form-control" name="file" id="file">
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="mb-3">
+
+
+                        <label for="content" class="form-label">Images</label>
+                        <ul>
+                            @foreach (var image in Model.BkLib.BookImages)
+                            {
+                                <li>
+                                    <input type="checkbox" name="selectedImages" value="@image.BookImageId" />
+                                    <div class="col-lg-3 col-sm-6 p-3">
+                                        <div class="row p-2">
+                                            <div class="col-12 p-1">
+                                                <div class="card border-0 p-3 shadow border-top border-5 rounded">
+                                                    <img style="inset-inline-start" src="@image.ImagePath" class="card-img-top rounded" height="130" width="100" />
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </li>
+                            }
+                        </ul>
+
+                        <input type="file" multiple class="form-control" name="Image" id="BookImages" asp-for="BkLib.BookImages">
+                    </div>
+                </div>
+            </div>
+
+           
+           
+        <div class="mb-3">
+            <button class="btn btn-primary" type="submit">Submit</button>
+        </div>
+
+    </form>
+</div>
+</div>
+

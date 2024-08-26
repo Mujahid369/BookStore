@@ -1,0 +1,49 @@
+﻿@page
+@model BookManagementStore.Pages.BookDetailsModel
+
+<form id="detailsModalContent">
+    <div class="container">
+        <h2 class="mb-4"><b>Book Details</b></h2>
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title"><b>@Model.BookLibrary.BookName</b></h5>
+                        <p class="card-text"><b>Author:</b> @Model.BookLibrary.Author</p>
+                        <p class="card-text"><b>Description:</b> @Model.BookLibrary.Description</p>
+                        <p class="card-text"><b>Price:</b> @Model.BookLibrary.SoldPrice</p>
+                        <p class="card-text"><b>ISBN:</b> @Model.BookLibrary.ISBAN</p>
+                        <p class="card-text"><b>Quantity:</b> @Model.BookLibrary.Quantity</p>
+                    </div>
+                </div>
+            </div>
+            @if (Model.BookLibrary.BookImages != null && Model.BookLibrary.BookImages.Any())
+            {
+                <div class="col-lg-6">
+                    <div class="row row-cols-1 row-cols-md-2 g-3">
+                        @foreach (var item in Model.BookLibrary.BookImages)
+                        {
+                            <div class="col">
+                                <div class="card border-0 shadow">
+                                    <img src="@item.ImagePath" class="card-img-top rounded" style="height: 250px; object-fit: cover;" alt="Book Image">
+                                    <div class="card-body p-2">
+                                        <a href="@item.ImagePath" class="btn btn-sm btn-outline-primary stretched-link" target="_blank">View Full Size</a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Add tooltips to enhance user experience
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+    </script>
+}

@@ -1,0 +1,107 @@
+﻿@page
+@model BookManagementStore.Pages.BooksModel
+@{
+    Layout = "_Layout";
+}
+
+<div class="container mt-3">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card sidebar" sty>
+                <div class="card-body">
+                    <h5 class="card-title">Filter by Categories</h5>
+                    <form id="filterForm" method="get" asp-page="/Books">
+                        @foreach (var category in Model.Categories)
+                        {
+                            <div class="form-check">
+                                <input class="form-check-input category-checkbox" type="checkbox" value="@category.CategoryId" id="category_@category.CategoryId"
+                                @(Model.SelectedCategoriesString?.Contains(category.CategoryId.ToString()) == true ? "checked" : "")>
+                                <label class="form-check-label" for="category_@category.CategoryId">@category.CategoryName</label>
+                            </div>
+                        }
+                        <input type="hidden" name="SelectedCategoriesString" id="SelectedCategoriesString" value="@Model.SelectedCategoriesString" />
+                    </form>
+
+                    <h5 class="card-title mt-4">Filter by ISBN</h5>
+                    <form id="isbnFilterForm" method="get" asp-page="/Books">
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" id="isbnInput" name="SelectedISBN" placeholder="Enter ISBN" value="@Model.SelectedISBN">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                        </div>
+                    </form>
+
+                    <h5 class="card-title mt-4">Filter by Price Range</h5>
+                    <form id="priceFilterForm" method="get" asp-page="/Books">
+                        <div class="input-group mb-3">
+                            <input type="range" class="form-range custom-range" id="priceRangeInput" name="PriceRange" min="0" max="100" value="@Model.PriceRange">
+                            <span id="priceRangeValue" class="ml-2">@Model.PriceRange</span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div class="row" id="bookList">
+                @foreach (var book in Model.Books)
+                {
+                    <div class="col-md-4 mb-4 book-item">
+                        <div class="card">
+                            <img src="@book.Image" class="card-img-top" alt="@book.BookName">
+                            <div class="card-body">
+                                <h5 class="card-title">@book.BookName</h5>
+                                <p class="card-text">@book.Description</p>
+                                <a href="/BookDetails?id=@book.BookId" class="btn btn-primary">Details</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+                @if (!Model.Books.Any())
+                {
+                    <div class="col-md-12">
+                        <p class="text-muted">No books available in the selected category, ISBN, or price range.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const checkboxes = document.querySelectorAll('.category-checkbox');
+            const isbnInput = document.getElementById('isbnInput');
+            const priceRangeInput = document.getElementById('priceRangeInput');
+            const priceRangeValue = document.getElementById('priceRangeValue');
+
+            priceRangeValue.textContent = priceRangeInput.value;
+
+            checkboxes.forEach(function (checkbox) {
+                checkbox.addEventListener('change', function () {
+                    document.getElementById('SelectedCategoriesString').value = Array.from(checkboxes)
+                        .filter(cb => cb.checked)
+                        .map(cb => cb.value)
+                        .join(',');
+                    document.getElementById('filterForm').submit();
+                });
+            });
+
+            isbnInput.addEventListener('input', function () {
+                clearTimeout(this.timeout);
+                this.timeout = setTimeout(function () {
+                    document.getElementById('isbnFilterForm').submit();
+                }, 500);
+            });
+
+            priceRangeInput.addEventListener('input', function () {
+                priceRangeValue.textContent = this.value;
+            });
+
+            priceRangeInput.addEventListener('change', function () {
+                document.getElementById('priceFilterForm').submit();
+            });
+        });
+    </script>
+}
+
+

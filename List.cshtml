@@ -1,0 +1,423 @@
+﻿ @page
+@model BookManagementStore.Pages.ListModel
+
+@{
+    ViewData["Title"] = "List";
+    BookManagementStore.Models.BookLibrary m = new BookManagementStore.Models.BookLibrary();
+}
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+<style>
+    .input-group {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .btn-custom {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        color: white;
+    }
+
+        .btn-custom:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+        }
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.4/jquery-confirm.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.4/jquery-confirm.min.js"></script>
+<!-- Details Modal -->
+<div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+              
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <partial name="_Details" model="m" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Html.AntiForgeryToken()
+<div class="container">
+    <form method="post">
+        <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content" style="width: 200%;margin-left: -35%;">
+                    <div class="modal-header">
+
+                        <h5 class="modal-title" id="exampleModalLabel">Edit Book</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+
+                        <partial name="_AddBook" model="m" />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button id="callMethodButton" type="submit" class="btn btn-primary">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+ 
+   
+        <div class="bg-secondary bg-opacity-10 py-2 mb-5 mt-5">
+            <div class="card">
+                <div class="container mt-4">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <!-- Search Input with Button -->
+                            <div class="input-group">
+                                <input class="form-control" id="myInput" type="text" placeholder="Search by book name..">
+                                <div class="input-group-append">
+                                    <button class="btn btn-custom" type="button" id="searchButton">Search</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <!-- Category Dropdown with Button -->
+                            <div class="input-group">
+                                <select class="form-control" id="categorySelect">
+                                    <option value="">Select Category</option>
+                                    @foreach (var category in Model.categories)
+                                    {
+                                        <option value="@category.CategoryName">@category.CategoryName</option>
+                                    }
+                                </select>
+                                <div class="input-group-append">
+                                    <button class="btn btn-custom" type="button" id="categoryButton">Search</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- Table -->
+                    <table id="bookTable" class="table table-striped table-bordered">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Image</th>
+                                <th>Book Name</th>
+                                <th>Category</th>
+                                <th>Author</th>
+                                <th>ISBN</th>
+                                <th>Quantity</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var blogpost in Model.bk)
+                            {
+                                <tr class="book-row">
+                                    <td>
+                                        <img src="@blogpost.Image" class="img-thumbnail" style="height: 105px; width: 129px;" alt="Book Image" />
+                                    </td>
+                                    <td class="book-name">@blogpost.BookName</td>
+                                    <td class="book-category">@blogpost.Categories.CategoryName</td>
+                                    <td>@blogpost.Author</td>
+                                    <td>@blogpost.ISBAN</td>
+                                    <td>@blogpost.Quantity</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button type="button" style="margin: 3px" class="btn btn-primary" onclick="loadDetails('@blogpost.BookId')">Details</button>
+                                            <button type="button" style="margin: 3px"
+                                                    onclick='btnShow(@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(blogpost)))'
+                                                    class="btn btn-primary">
+                                                Edit
+                                            </button>
+                                            <button type="button" class="btn btn-danger" onclick="deleteBook('@blogpost.BookId')">Delete</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+
+            </div>
+            
+        </div>
+    </form>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        function searchBooks() {
+            var value = $('#myInput').val().toLowerCase();
+            $('#bookTable .book-row').filter(function () {
+                $(this).toggle($(this).find('.book-name').text().toLowerCase().indexOf(value) > -1);
+            });
+        }
+
+        function filterByCategory() {
+            var selectedCategory = $('#categorySelect').val().toLowerCase();
+            console.log("Selected Category: " + selectedCategory); // Debug log
+
+            $('#bookTable .book-row').each(function () {
+                var category = $(this).find('.book-category').text().toLowerCase();
+                console.log("Row Category: " + category); // Debug log
+
+                if (selectedCategory === "") {
+                    $(this).toggle(true);
+                } else {
+                    var match = category === selectedCategory;
+                    console.log("Match: " + match); // Debug log
+                    $(this).toggle(match);
+                }
+            });
+        }
+
+        $('#myInput').on('keyup', function () {
+            searchBooks();
+        });
+
+        $('#searchButton').on('click', function () {
+            searchBooks();
+        });
+
+        $('#categorySelect').on('change', function () {
+            filterByCategory();
+        });
+
+        $('#categoryButton').on('click', function () {
+            filterByCategory();
+        });
+    });
+
+
+    $(document).ready(function () {
+        function searchProducts() {
+            var value = $('#myInput').val().toLowerCase();
+            $('.product-card').filter(function () {
+                $(this).toggle($(this).find('.  -name').text().toLowerCase().indexOf(value) > -1);
+            });
+        }
+
+        $('#myInput').on('keyup', function () {
+            searchProducts();
+        });
+
+        $('#searchButton').on('click', function () {
+            searchProducts();
+        });
+    });
+    function loadDetails(bookId) {
+        $.ajax({
+            url: '/BookDetails?id=' + bookId,
+            type: 'GET',
+            success: function (data) {
+                $('#detailsModalContent').html(data);
+                $('#detailsModal').modal('show');
+            },
+            error: function () {
+                alert('Failed to load details.');
+            }
+        });
+    }
+    $(document).ready(function () {
+        $('#bookTable').DataTable({
+            paging: true, // Enable pagination
+            pageLength: 10, // Set number of rows per page
+            lengthMenu: [5, 10, 20, 50], // Customizable length menu
+            ordering: true, // Enable ordering (you can set it to false if not needed)
+            info: true, // Enable the "Showing x to y of z entries" information
+            responsive: true, // Enable responsive mode
+            searching: false, // Disable search feature
+            dom: '<"row d-flex justify-content-between"<"col-md-6"l><"col-md-6"f>>rt<"row d-flex justify-content-between"<"col-md-6"i><"col-md-6"p>>' // Adjusted layout for DataTable components
+        });
+    });
+
+
+
+    function btnShow(blogPost) {
+        console.log(blogPost); 
+
+        // Show the modal
+        $("#myModal").modal("show");
+
+     
+        $("#BookId").val(blogPost.BookId);
+        $("#BookName").val(blogPost.BookName);
+        $("#Author").val(blogPost.Author);
+        $("#Description").val(blogPost.Description);
+        $("#ISBAN").val(blogPost.ISBAN);
+
+        // Set the image source for the book's main image
+        $("#Img").attr('src', blogPost.Image);
+
+        // Clear existing images in the BookImages section
+        $("#BookImages").empty();
+
+        // Generate HTML for book images
+        var imagesHtml = `<div class="row">`;
+        $.each(blogPost.BookImages, function (index, item) {
+            imagesHtml += `
+                <div class="col-6 p-2">
+                    <img src="${item.ImagePath}" width="100%" />
+                    <a href="${item.ImagePath}" class="card-img-top rounded" height="140" width="150" target="_blank">View</a>
+                    <a href="#" data-ImagePath="${item.ImagePath}" onclick="deleteBook12(this, '${item.BookImageId}')">Delete</a>
+                </div>`;
+        });
+        imagesHtml += `</div>`;
+
+        // Append the generated HTML to the BookImages section
+        $("#BookImages").html(imagesHtml);
+    }
+
+
+    $(document).ready(function () {
+        $('#callMethodButton').click(function (e) {
+            e.preventDefault();
+            var formData = new FormData();
+            formData.append('BookId', $('#BookId').val());
+            formData.append('BookName', $('#BookName').val());
+            formData.append('Author', $('#Author').val());
+            formData.append('Description', $('#Description').val());
+            formData.append('ISBAN', $('#ISBAN').val());
+            formData.append('Image', $('#Image')[0].files[0]);
+
+            $.each($("#fileInput")[0].files, function (index, item) {
+                formData.append('BookImages', item);
+            });
+
+            $.ajax({
+                type: 'POST',
+                url: '/EditBook?handler=BookData',
+                headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
+                data: formData,
+                processData: false,
+                contentType: false,
+                cache: false,
+                success: function (response) {
+                    console.log("Response from PageX:", response);
+                    var successMessage = '@TempData["SuccessMessage"]';
+                    window.location.href = '/List';
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error calling method on PageX:", error);
+                    var ErrorMessage = '@TempData["ErrorMessage"]';
+                    window.location.href = '/List';
+                }
+            });
+        });
+
+        $('#fileInput').on('change', function (event) {
+            $('#imagePreview').empty(); 
+            var files = event.target.files;
+
+            for (var i = 0; i < files.length; i++) {
+                var file = files[i];
+
+                if (file && file.type.match('image.*')) {
+                    var reader = new FileReader();
+
+                    reader.onload = (function (f) {
+                        return function (e) {
+                            var img = $('<img>').attr('src', e.target.result).addClass('img-thumbnail').css('max-width', '300px').css('margin', '10px');
+                            $('#imagePreview').append(img);
+                        };
+                    })(file);
+
+                    reader.readAsDataURL(file);
+                }
+            }
+        });
+    });
+    function deleteBook(BookId) {
+
+        var token = $('input[name="__RequestVerificationToken"]').val();
+
+        // Show jQuery Confirm dialog
+        $.confirm({
+            title: 'Confirm Delete',
+            content: 'Are you sure you want to delete this book?',
+            buttons: {
+                confirm: function () {
+                    // If user confirms delete, call the AJAX request
+                    $.ajax({
+                        type: 'POST',
+                        url: '/List?handler=Delete',
+                        headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
+                        data: {
+                            id: BookId
+                        },
+
+
+                        success: function (response) {
+
+                            console.log("Response from PageX:", response);
+                            var successMessage = '@TempData["SuccessMessage"]';
+                            window.location.href = '/List';
+
+                        },
+                        error: function (xhr, status, error) {
+
+                            console.error("Error calling method on PageX:", error);
+                        }
+                    });
+                },
+                cancel: function () {
+                    // If user cancels delete, do nothing
+                }
+            }
+        });
+    }
+
+    function deleteBook12(element, bookImageid) {
+        var imagePath = $(element).data("ImagePath");
+        var token = $('input[name="__RequestVerificationToken"]').val();
+
+        // Show jQuery Confirm dialog
+        $.confirm({
+            title: 'Confirm Delete',
+
+            content: 'Are you sure you want to delete this image?',
+            buttons: {
+                confirm: function () {
+                    // If user confirms delete, proceed with AJAX request
+                    $.ajax({
+                        url: '@Url.Page("/List", "DeleteImage")',
+                        type: "POST",
+                        headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
+                        data: { id: bookImageid },
+                        success: function (result) {
+                            $(".image-container img[src='" + imagePath + "']").parent().remove();
+                            $.alert('Image deleted successfully!');
+                            window.location.href = '/List';
+                        },
+                        error: function (xhr, status, error) {
+                            $.alert('Error deleting image. Please try again later.');
+                        }
+                    });
+                },
+                cancel: function () {
+                    // If user cancels delete, show cancel alert
+                    $.alert('Canceled!');
+                }
+            }
+        });
+    }
+
+
+
+</script>
+
+
+

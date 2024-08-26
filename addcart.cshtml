@@ -1,0 +1,105 @@
+﻿@page
+@model BookManagementStore.Pages.addcartModel
+@{
+}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10">
+            <div class="card shadow-lg">
+                <div class="card-header bg-info bg-opacity-25 text-primary p-3">
+                    <div class="row justify-content-center">
+                        <div class="col-sm-6">
+                            <h5><i class="bi bi-cart3"></i> Shopping Cart</h5>
+                        </div>
+                        <div class="col-sm-6">
+                            <a class="btn btn-primary w-100" asp-page="Index">
+                                <i class="bi bi-reply-all"></i> Continue shopping
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <input type="hidden" asp-for="@Model.sBookLibrary.BookId" />
+                        <div class="row align-items-center">
+                            <div class="col-md-2">
+                            <img src="@Model.sBookLibrary.Image" class="img-responsive" src="~/img/book_img.jpg" width="100%" />
+                           
+                            </div>
+                            <div class="col-md-4">
+                                <h5 class="product-name"><strong>Book Name</strong></h5>
+                            <h6><small> @Model.sBookLibrary.BookName</small></h6>
+                            </div>
+                        <div class="col-md-4">
+                               
+                                <h5 class="product-name"><strong>Book Price</strong></h5>
+                                <h5><small>@Model.sBookLibrary.SoldPrice</small></h5>
+                            </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mt-5">
+                            <label>Name</label>
+                                <input type="text" placeholder="Optional" />
+                            </div>
+                            <div class="col-md-6 mt-5">
+                                <label>Phone</label>
+                                <input type="text" placeholder="Optional"/>
+                            </div>
+                            </div>
+                                    <div class="col-2">
+                                        <form method="post" asp-page="Purchase" asp-page-handler="RemoveItem">
+                                            <button class="btn btn-link btn-sm" name="id" value="@Model.sBookLibrary.BookId">
+                                                <i class="bi bi-trash3 text-danger fs-4"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                         
+                        </div>
+                        <hr>
+                
+                </div>
+                <div class="card-footer p-3">
+                    <div class="row">
+                        <div class="col-9">
+                            <h4 class="text-end">Total <strong>$@ViewData["total"]</strong></h4>
+                        </div>
+                    <div class="col-3">
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <a type="button" class="btn btn-success" onclick="checkout()">
+                                Checkout
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="/Identity/Account/Login?ReturnUrl=/Checkout" type="button" class="btn btn-success" onclick="saveCartDataToLocalStorage()">
+                                Checkout
+                            </a>
+                        }
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@section Scripts {
+    <script>
+        function saveCartDataToLocalStorage() {
+            // Assuming you have a JavaScript object containing the cart data
+            const cartData = {
+                bookId: '@Model.sBookLibrary.BookId',
+                bookName: '@Model.sBookLibrary.BookName',
+                bookPrice: '@Model.sBookLibrary.SoldPrice',
+                // Add other necessary fields here
+            };
+
+            localStorage.setItem('cartData', JSON.stringify(cartData));
+        }
+
+        function checkout() {
+            // Redirect to the checkout page
+            window.location.href = "/CheckOut";
+        }
+    </script>
+}
